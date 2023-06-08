@@ -1,0 +1,19 @@
+.popup__button-close {
+    cursor: pointer;
+    background-color: transparent;
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    padding: 0;
+    border-width: 0;
+}
+
+@media (max-width: 550px) {
+    .popup__button-close {
+        top: -36px;
+        right: 0px;
+        max-width: 20px;
+        max-height: 20px;
+    }
+
+}

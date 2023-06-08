@@ -1,0 +1,9 @@
+.profile__add-button-img {
+    object-fit: contain;
+}
+
+@media (max-width: 650px) {
+    .profile__add-button-img {
+        max-width: 16px;
+    }
+}

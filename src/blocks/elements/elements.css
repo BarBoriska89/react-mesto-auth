@@ -1,0 +1,19 @@
+.elements {
+    max-width: 880px;
+    margin: 50px auto 68px auto;
+    color: #000;
+}
+
+@media (max-width: 1023px) {
+    .elements {
+        width: 90%;
+    }
+}
+
+@media (max-width: 450px) {
+    .elements {
+        width: 88.125%;
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+}
