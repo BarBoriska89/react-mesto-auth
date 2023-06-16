@@ -1,35 +1,51 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { Route, Routes, Navigate, useNavigate } from 'react-router-dom';
+import ProtectedRouteElement from './ProtectedRoute';
 import Header from './Header';
 import Main from './Main';
 import Footer from './Footer';
+import Login from './Login';
+import Register from './Register';
 import PopupWithForm from './PopupWithForm ';
 import ImagePopup from './ImagePopup';
 import EditAvatarPopup from './EditAvatarPopup';
 import EditProfilePopup from './EditProfilePopup';
 import AddPlacePopup from './AddPlacePopup';
 import api from '../utils/Api';
+import { register, authorize, getContent } from '../utils/Auth';
 import { CurrentUserContext } from '../contexts/CurrentUserContext';
+import InfoTooltip from './InfoTooltip ';
 
 
 
 function App() {
 
-  const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = React.useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
+  const navigate = useNavigate();
 
-  const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = React.useState(false);
+  const [isEditProfilePopupOpen, setIsEditProfilePopupOpen] = useState(false);
 
-  const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = React.useState(false);
+  const [isAddPlacePopupOpen, setIsAddPlacePopupOpen] = useState(false);
 
-  const [isDeleteCardPopupOpen, setIsDeleteCardPopupOpen] = React.useState(false);
+  const [isEditAvatarPopupOpen, setIsEditAvatarPopupOpen] = useState(false);
 
-  const [selectedCard, setSelectedCard] = React.useState(null);
+  const [isDeleteCardPopupOpen, setIsDeleteCardPopupOpen] = useState(false);
 
-  const [currentUser, setCurrentUser] = React.useState({});
-  const [cards, setCards] = React.useState([]);
+  const [isInfoTooltipPopupOpen, setIsInfoTooltipPopupOpen] = useState(false);
+
+  const [selectedCard, setSelectedCard] = useState(null);
+
+  const [currentUser, setCurrentUser] = useState({});
+  const [cards, setCards] = useState([]);
+
+  const [userEmailOnHeader, setUserEmailOnHeader] = useState('');
+
+  const [isSuccessfulRegistration, setIsSuccessfulRegistration] = useState(null);
 
 
 
-  React.useEffect(() => {
+
+  useEffect(() => {
     const promises = [api.getUser(), api.getCards()];
 
     const getInfo = Promise.all(promises);
@@ -41,7 +57,67 @@ function App() {
       }
       )
       .catch((err) => console.log("Ошибка запроса данных о пользователе ", err));
+  }, []);
+
+  const handleTokenCheck = () => {
+    if (localStorage.getItem('jwt')) {
+      const jwt = localStorage.getItem('jwt');
+      getContent(jwt).then((res) => {
+
+        if (res) {
+          handleLogin();
+          setUserEmailOnHeader(res.data.email);
+          navigate("/", { replace: true })
+        }
+      })
+        .catch((err) => console.log(err));
+    }
+  }
+
+  useEffect(() => {
+    handleTokenCheck();
   }, [])
+
+  function handleRegister(email, password) {
+
+    console.log(email, password);
+    register({ email, password })
+      .then((res) => {
+        console.log(res);
+        setIsSuccessfulRegistration(true);
+        setIsInfoTooltipPopupOpen(true);
+        navigate('/sign-in', { replace: true });
+      })
+      .catch((err) => {
+        console.log(err);
+        setIsSuccessfulRegistration(false);
+        setIsInfoTooltipPopupOpen(true);
+      });
+  }
+
+  function onLogin(email, password) {
+    authorize({ email, password })
+      .then((data) => {
+        console.log(data);
+        if (data.token) {
+          localStorage.setItem('jwt', data.token);
+          handleLogin();
+          setUserEmailOnHeader(email);
+          navigate("/", { replace: true });
+        }
+      })
+      .catch(err => console.log(err));
+  }
+
+  const handleLogin = () => {
+    setLoggedIn(true);
+
+  }
+
+  function onSignOut() {
+    localStorage.removeItem('jwt');
+    setUserEmailOnHeader('');
+  }
 
   function handleEditAvatarClick() {
     setIsEditAvatarPopupOpen(true);
@@ -62,12 +138,14 @@ function App() {
     setSelectedCard({ name, link });
   }
 
+
   function closeAllPopups() {
     setIsEditAvatarPopupOpen(false);
     setIsEditProfilePopupOpen(false);
     setIsAddPlacePopupOpen(false);
     setIsDeleteCardPopupOpen(false);
     setSelectedCard(null);
+    setIsInfoTooltipPopupOpen(false);
   }
 
   function handleCardLike(card) {
@@ -148,16 +226,28 @@ function App() {
 
     <CurrentUserContext.Provider value={currentUser}>
       <div>
-        <Header />
-        <Main onEditProfile={handleEditProfileClick}
-          onAddPlace={handleAddPlaceClick}
-          onEditAvatar={handleEditAvatarClick}
-          onCardClick={handleCardClick}
-          onCardLike={handleCardLike}
-          onCardDelete={handleCardDelete}
-          cards={cards}
-        />
+        <Header userEmailOnHeader={userEmailOnHeader} onSignOut={onSignOut} />
+
+
+        <Routes>
+          <Route path="/" element={loggedIn ? <Navigate to="/mesto-react" replace /> : <Navigate to="/sign-in" replace />} />
+          <Route path="/mesto-react" element={<ProtectedRouteElement element={Main}
+            onEditProfile={handleEditProfileClick}
+            onAddPlace={handleAddPlaceClick}
+            onEditAvatar={handleEditAvatarClick}
+            onCardClick={handleCardClick}
+            onCardLike={handleCardLike}
+            onCardDelete={handleCardDelete}
+            cards={cards}
+            loggedIn={loggedIn} />} />
+          <Route path="/sign-in" element={<Login onLogin={onLogin} loggedIn={loggedIn} />} />
+          <Route path="/sign-up" element={<Register handleRegister={handleRegister} isSuccessfulRegistration={isSuccessfulRegistration} />} />
+        </Routes>
+
+
+
         <Footer />
+
 
         <EditAvatarPopup
           isOpen={isEditAvatarPopupOpen}
@@ -191,6 +281,13 @@ function App() {
           onClose={closeAllPopups}
           card={selectedCard}
         />
+
+        <InfoTooltip
+          isOpen={isInfoTooltipPopupOpen}
+          onClose={closeAllPopups}
+          name={"infotool"}
+        />
+
       </div>
     </CurrentUserContext.Provider>
 

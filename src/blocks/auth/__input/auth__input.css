@@ -1,0 +1,15 @@
+.auth__input {
+    border: none;
+    border-bottom: 2px solid #CCCCCC;
+    width: 358px;
+    height: 14px;
+    background: transparent;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 17px;
+    color: #CCCCCC;
+    padding: 0;
+    padding-bottom: 9px;
+    margin: 0px 36px 0 36px;
+}
