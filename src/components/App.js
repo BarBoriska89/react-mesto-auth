@@ -281,9 +281,10 @@ function App() {
           onClose={closeAllPopups}
           card={selectedCard}
         />
-
+ 
         <InfoTooltip
           isOpen={isInfoTooltipPopupOpen}
+          isSuccessfulRegistration={isSuccessfulRegistration}
           onClose={closeAllPopups}
           name={"infotool"}
         />

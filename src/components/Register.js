@@ -26,8 +26,7 @@ function Register(props) {
 
     return (
         <div className="auth">
-            <InfoTooltip isSuccessfulRegistration={props.isSuccessfulRegistration} />
-            <div className="auth__container">
+                       <div className="auth__container">
 
                 <form className="auth__form" id="loginForm" name="loginForm" noValidate onSubmit={handleSubmit}>
                     <h2 className="auth__title">Регистрация</h2>

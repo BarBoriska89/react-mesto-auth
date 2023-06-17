@@ -12,7 +12,7 @@ function PopupWithForm(props) {
                     <img src={closeIconPath} alt="Крестик закрытия окна"
                         className="popup__button-close-img" />
                 </button>
-                <form className="popup__form" id={props.name} name="editForm" noValidate onSubmit={props.onSubmit}>
+                <form className="popup__form" id={props.name} name={props.name} noValidate onSubmit={props.onSubmit}>
                     <h2 className="popup__title">{props.title}</h2>
                     {props.children}
                     <button className="popup__button" type="submit" aria-label="Сохранить изменения">{props.buttonText}</button>
